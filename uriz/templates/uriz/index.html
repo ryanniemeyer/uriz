@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block page_content %}
+<form action="{% url uriz %}" method="post">
+  {{ form.as_p }}
+  <p>
+    {% csrf_token %}
+    <input type="submit" value="{% trans 'Shorten' %}" class="button" />
+  </p>
+</form>
+{% endblock %}

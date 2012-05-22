@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block page_title %}uriz - {{ url_info.token }}{% endblock %}
+{% block page_content %}
+<h2>uriz.in/{{ url_info.token }}</h2>
+<section class="url-info">
+    <dl>
+        <dt>{% trans "URL" %}</dt>
+        <dd><a href="{{ url_info.long_url }}">{{ url_info.long_url }}</a></dd>
+        <dt>{% trans "Shortened on" %}</dt>
+        <dd>{{ url_info.created|date:"DATETIME_FORMAT" }}</dd>
+        <dt>{% trans "Visits" %}</dt>
+        <dd>{{ url_info.visits }}</dd>
+    </dl>
+</section>
+{% endblock %}

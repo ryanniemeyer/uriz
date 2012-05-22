@@ -1,0 +1,41 @@
+body,html{
+    background-color:#000;
+    color:#0C3;
+    margin:15px;
+}
+a,a:visited{
+    color:#0C3;
+    text-decoration:none;
+    cursor:pointer;
+}
+a:hover{text-decoration:underline;}
+input[type=text]{
+    color:#000;
+    background-color:#FFF;
+    border:none;
+    font-size:18px;
+}
+.button, .button:visited {
+    display: inline-block;
+    padding: 5px 10px 6px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    text-shadow: 0 -1px 1px rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    position: relative;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1;
+    text-shadow: 0 -1px 1px rgba(0,0,0,0.25);
+    background-color: #0C3;
+}
+.button:hover {background-color: #0F0;}
+ul.errorlist {list-style:none;}
+ul.errorlist li{color:red;}

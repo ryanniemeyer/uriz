@@ -1,0 +1,15 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="utf-8" />
+  <title>{% block page_title %}{% trans "uriz - A URL Shortener" %}{% endblock %}</title>
+  <!-- <link rel="stylesheet" href="http://???.cloudfront.net/uriz/css/s-1.css" /> -->
+</head>
+<body>
+<header>
+  <h1><a href="/">{% trans "uriz - A URL Shortener" %}</a></h1>
+</header>
+{% block page_content %}{% endblock %}
+</body>
+</html>
