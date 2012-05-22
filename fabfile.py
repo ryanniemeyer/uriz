@@ -33,7 +33,7 @@ def newbox():
 
     with cd('/opt/djangoprojects/uriz/'):
         with prefix('workon uriz'):
-	        run('python manage.py run_gunicorn')
+            run('python manage.py run_gunicorn')
 
     sudo('/etc/init.d/nginx restart')
 
@@ -89,10 +89,10 @@ def _install_code():
         sudo('git clone https://github.com/ryanniemeyer/uriz.git')
 
     with cd('/opt/djangoprojects/uriz/'):
-	    # Swap in our nginx conf
-	    sudo('chmod 744 /opt/djangoprojects/uriz/config/nginx.conf')
+        # Swap in our nginx conf
+        sudo('chmod 744 /opt/djangoprojects/uriz/config/nginx.conf')
         sudo('ln -s /opt/djangoprojects/uriz/config/nginx.conf /etc/nginx/nginx.conf')
 
         # Install all of our Python dependencies
         with prefix('workon uriz'):
-	        run('pip install -r requirements.txt')
+            run('pip install -r requirements.txt')
