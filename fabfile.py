@@ -5,13 +5,6 @@ from fabric.context_managers import prefix
 from fabric.contrib.files import append as file_append
 from fabric.contrib.files import sed
 
-env.roledefs = {
-    # Update this with your web EC2 instance host(s)
-    # after you run the newbox task on them
-    'web': ['your.ec2.hostname1',
-            'your.ec2.hostname2'],
-}
-
 env.user = 'ubuntu'
 
 # The location of your ec2 key pair. You can find this in the
@@ -43,22 +36,6 @@ def newbox():
 	        run('python manage.py run_gunicorn')
 
     sudo('/etc/init.d/nginx restart')
-
-@task
-@roles('web')
-def updatecode():
-    """Updates the code on all existing web boxes.
-
-    To run::
-
-        fab updatecode
-
-    """
-    with cd('/opt/djangoprojects/uriz/'):
-	    run('git pull origin master')
-
-    with cd('/opt/djangoprojects/uriz/uriz/'):
-	    run('touch wsgi.py')
 
 def _update_OS():
     sudo('apt-get -y -q update')
