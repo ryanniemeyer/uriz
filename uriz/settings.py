@@ -3,19 +3,17 @@
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
-ADMINS = (
-    ('Ryan Niemeyer', 'ryan.niemeyer@gmail.com'),
-)
-
-MANAGERS = ADMINS
-
 DEFAULT_SHORT_TOKEN_LENGTH = 6
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
-EMAIL_BACKEND = 'django_ses.SESBackend'
-AWS_ACCESS_KEY_ID = 'YOUR-ACCESS-KEY-ID'
-AWS_SECRET_ACCESS_KEY = 'YOUR-SECRET-ACCESS-KEY'
+# Assumes you have your AWS access key and secret in a
+# file named my_aws_settings in your uriz app. That file
+# is in the .gitignore, but read by fabfile during deployment.
+# It should contain code that looks like this::
+#     AWS_ACCESS_KEY_ID = 'YOUR-ACCESS-KEY-ID'
+#     AWS_SECRET_ACCESS_KEY = 'YOUR-SECRET-ACCESS-KEY'
+from uriz.my_aws_settings import *
 
 TIME_ZONE = 'UTC'
 LANGUAGE_CODE = 'en-us'
@@ -79,30 +77,6 @@ INSTALLED_APPS = (
     'gunicorn',
     'uriz',
 )
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
-    },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    }
-}
 
 # No DB needed, we're using Amazon DynamoDB for storage, cookies for sessions
 DATABASES = {

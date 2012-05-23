@@ -5,6 +5,9 @@ from fabric.context_managers import prefix
 from fabric.contrib.files import append as file_append
 from fabric.contrib.files import sed
 
+from uriz.my_aws_settings import AWS_ACCESS_KEY_ID
+from uriz.my_aws_settings import AWS_SECRET_ACCESS_KEY
+
 env.user = 'ubuntu'
 
 # The location of your ec2 key pair. You can find this in the
@@ -29,13 +32,28 @@ def newbox():
     _install_git()
     _install_python_schtuff()
     _install_nginx()
+    _install_apache2()
     _install_code()
+    apache_restart()
+    nginx_restart()
 
-    with cd('/opt/djangoprojects/uriz/'):
-        with prefix('workon uriz'):
-            run('python manage.py run_gunicorn')
+def apache_start():
+    sudo('/etc/init.d/apache2 start')
 
+def apache_restart():
+    sudo('/etc/init.d/apache2 restart')
+
+def apache_stop():
+    sudo('/etc/init.d/apache2 stop')
+
+def nginx_restart():
     sudo('/etc/init.d/nginx restart')
+
+def nginx_reload():
+    sudo('/etc/init.d/nginx reload')
+
+def nginx_stop():
+    sudo('/etc/init.d/nginx stop')
 
 def _update_OS():
     sudo('apt-get -y -q update')
@@ -83,6 +101,15 @@ def _install_nginx():
     # Remove default Ubuntu nginx conf, we'll replace it with our nginx conf
     sudo('rm /etc/nginx/nginx.conf')
 
+def _install_apache2():
+    # Installs to /etc/apache2
+    sudo('apt-get -y -q install apache2')
+    sudo('apt-get -y -q install libapache2-mod-wsgi')
+
+    # Remove default Ubuntu apache cruft, we'll replace it with our apache conf
+    with cd('/etc/apache2/'):
+        sudo('rm -rf apache2.conf conf.d/ httpd.conf magic mods-* sites-* ports.conf')
+
 def _install_code():
     sudo('mkdir -p /opt/djangoprojects/')
     with cd('/opt/djangoprojects/'):
@@ -93,6 +120,19 @@ def _install_code():
         sudo('chmod 744 /opt/djangoprojects/uriz/config/nginx.conf')
         sudo('ln -s /opt/djangoprojects/uriz/config/nginx.conf /etc/nginx/nginx.conf')
 
+        # Swap in our apache conf
+        sudo('chmod 744 /opt/djangoprojects/uriz/config/apache2.conf')
+        sudo('ln -s /opt/djangoprojects/uriz/config/apache2.conf /etc/apache2/apache2.conf')
+
         # Install all of our Python dependencies
         with prefix('workon uriz'):
             run('pip install -r requirements.txt')
+
+    # Add in the AWS key and secret that you should have in my_aws_settings.py locally,
+    # but is not checked into github...
+    with cd('/opt/djangoprojects/uriz/uriz/'):
+        sudo('touch my_aws_settings.py')
+        file_append('my_aws_settings.py',
+                    ['AWS_ACCESS_KEY_ID = "{0}"'.format(AWS_ACCESS_KEY_ID),
+                     'AWS_SECRET_ACCESS_KEY = "{0}"'.format(AWS_SECRET_ACCESS_KEY)],
+                    use_sudo=True, partial=False, escape=True)
