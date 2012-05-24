@@ -1,4 +1,4 @@
-uriz is a simple, non-production example of a URL shortener [Django](https://www.djangoproject.com/) site. The purpose of this project is to walk someone through the steps for deploying a simple web app utilizing the following [Amazon Web Services](http://aws.amazon.com/) (AWS) features:
+uriz is a simple, non-production example of a URL shortener [Django](https://www.djangoproject.com/) site. The purpose of this project is to walk someone through the steps for deploying a simple web app utilizing the following [Amazon Web Services](http://aws.amazon.com/) (AWS):
 
 * [EC2](http://aws.amazon.com/ec2/) for the web nodes
 * [S3](http://aws.amazon.com/s3/) + [CloudFront](http://aws.amazon.com/cloudfront/) for static content
@@ -6,13 +6,15 @@ uriz is a simple, non-production example of a URL shortener [Django](https://www
 * [Route53](http://aws.amazon.com/route53/) for DNS
 * [ELB](http://aws.amazon.com/elasticloadbalancing/) to balance load to the EC2 web nodes
 
-This tutorial assumes you've already created a [AWS](http://aws.amazon.com/) account.
+This tutorial assumes you've already created an [AWS](http://aws.amazon.com/) account.
 
 ## Setup Your URL Shortener Domain
 
-The first step is obtaining a domain for your URL shortener from your favorite domain registrar (e.g. [Namecheap](http://namecheap.com/)). I picked uriz.in for this example, but you can simply fork this project and replace all occurrences of uriz.in with whatever your URL shortener domain is.
+The first step is obtaining a domain for your URL shortener from your favorite domain registrar (e.g. [Namecheap](http://namecheap.com/)). I picked uriz.in, so you can simply fork this project and replace all occurrences of uriz.in with whatever your domain is.
 
-After you've registered your domain, create a [Route53](http://aws.amazon.com/route53/) hosted zone via the AWS console:
+After you've registered your domain, we'll switch its DNS over to Amazon [Route53](http://aws.amazon.com/route53/) to make it easier to take advantage of other Amazon services.
+
+Create a [Route53](http://aws.amazon.com/route53/) hosted zone via the AWS console:
 
 ![Route53 in AWS Console](http://d283nftekqpxlr.cloudfront.net/img/github-pages/route53-1.png)
 ![Route53 new zone](http://d283nftekqpxlr.cloudfront.net/img/github-pages/route53-2.png)
@@ -30,7 +32,7 @@ Now that we've got our URL shortener domain and have it pointing to our Amazon D
 
 We'll have one table where our short URL tokens are the primary key and the value has metadata including the long URL, when the URL was first shortened and a count of how many times the short URL is visited. We'll also have a table that serves as a reverse index where the long URL is the primary key. There are certainly better ways to implement a URL shortener, but I'm not trying to demonstrate a bit.ly killer here, so bear with me.
 
-You can use the [DynamoDB APIs](http://aws.amazon.com/documentation/dynamodb/) or your favorite [AWS](http://aws.amazon.com/) client SDK to add/remove/edit your tables, but for this example we'll use the web console to create these two tables (uriz and uriz_long):
+You can use the [DynamoDB APIs](http://aws.amazon.com/documentation/dynamodb/) or your favorite [AWS](http://aws.amazon.com/) client SDK to add/remove/edit your tables, but for this example we'll use the web console to create our two tables (uriz and uriz_long):
 
 ![DynamoDB Console](http://d283nftekqpxlr.cloudfront.net/img/github-pages/dynamo-1a.png)
 ![DynamoDB Add uriz Table](http://d283nftekqpxlr.cloudfront.net/img/github-pages/dynamo-2.png)
@@ -39,6 +41,8 @@ You can use the [DynamoDB APIs](http://aws.amazon.com/documentation/dynamodb/) o
 ![DynamoDB Table Created](http://d283nftekqpxlr.cloudfront.net/img/github-pages/dynamo-5.png)
 ![DynamoDB Add uriz_long Table](http://d283nftekqpxlr.cloudfront.net/img/github-pages/dynamo-6.png)
 ![DynamoDB Both Tables Created](http://d283nftekqpxlr.cloudfront.net/img/github-pages/dynamo-7.png)
+
+[DynamoDB APIs](http://aws.amazon.com/documentation/dynamodb/) has a nice [free tier](http://aws.amazon.com/dynamodb/pricing/), so this shouldn't cost you anything to play around with.
 
 ## Static Content
 
@@ -55,7 +59,7 @@ After you get the code on your machine, go back to the AWS console and find the 
 
 Be sure to mark the css folder and the s-1.css file as public via the Actions drop down menu.
 
-Now locate CloudFront in the AWS console. Create a distribution on top of that S3 bucket so your CSS is served as close to your user as possible:
+Now locate CloudFront in the AWS console. Create a distribution on top of that S3 bucket so your CSS is served as close to your users as possible:
 
 ![CloudFront console](http://d283nftekqpxlr.cloudfront.net/img/github-pages/cloudfront-1.png)
 ![CloudFront Add Distribution](http://d283nftekqpxlr.cloudfront.net/img/github-pages/cloudfront-2.png)
@@ -69,7 +73,7 @@ In a production setting you'd want to automate the process of pushing your stati
 
 Ok, we've got our [DynamoDB](http://aws.amazon.com/dynamodb/) tables out there, our static content served up via CloudFront and our domain is pointed to Amazon's DNS. Now let's deploy the uriz Django app to [EC2](http://aws.amazon.com/ec2/).
 
-First thing we'll do is create a KeyPair that will allow us to SSH to our machine. This lets us deploy the code and log into the box should things go wrong. In the EC2 web console, go to the "Key Pairs" page and create a new pair. Name it uriz or something similar. When it downloads, save it to your local machine in the path /ec2/accounts/uriz/uriz.pem (if you want to save it somewhere else, you'll need to change that path in uriz/fabfile.py mentioned below).
+First thing we'll do is create a Key Pair that will allow us to SSH. This lets us deploy the code and log into the box should things go wrong. In the EC2 web console, go to the "Key Pairs" page and create a new pair. Name it uriz or something similar. When it downloads, save it to your local machine in the path /ec2/accounts/uriz/uriz.pem (if you want to save it somewhere else or pick a different Key Pair name, you'll simply need to change that path in uriz/fabfile.py mentioned below).
 
 Next, we'll define a security group for our web nodes that tells each box to only open port 22 (SSH) and port 80 (HTTP). Do that via the "Security Groups" page in the EC2 console, making sure to click the Apply Changes button when you're done:
 
@@ -77,7 +81,7 @@ Next, we'll define a security group for our web nodes that tells each box to onl
 ![Add Security Group](http://d283nftekqpxlr.cloudfront.net/img/github-pages/securitygroup-2.png)
 ![Open Ports 22 and 80 in Security Group](http://d283nftekqpxlr.cloudfront.net/img/github-pages/securitygroup-3.png)
 
-We're ready to launch a new machine in the cloud. In this example I'm using a bare bones Ubuntu 12.04, 64-bit instance storage Amazon Machine Image (AMI) ami-3c994355. Let's launch a single box using the KeyPair and security group we just set up:
+Now we're ready to launch a new machine in the cloud. In this example I'm using a bare bones Ubuntu 12.04, 64-bit instance storage Amazon Machine Image (AMI) ami-3c994355. Let's launch a single box using the Key Pair and security group we just created:
 
 ![EC2 Console](http://d283nftekqpxlr.cloudfront.net/img/github-pages/ec2-1.png)
 ![EC2 Classic](http://d283nftekqpxlr.cloudfront.net/img/github-pages/ec2-2.png)
@@ -94,7 +98,7 @@ Sweet! We've got an Ubuntu 12.04 small instance running! Make note of your new i
 
 Now let's install everything our Django app needs to run. To do that, we're using [fabric](http://fabfile.org/), which is a really nice Python library for running SSH commands on remote or local hosts.
 
-To run the fabric command to deploy uriz to your new [EC2](http://aws.amazon.com/ec2/) instance, you'll need a local Python environment that has fabric installed. In general, this means follow the instructions you'll find all over the interwebs that walk you through:
+To run the fabric task that configures and deploys the uriz app to your new [EC2](http://aws.amazon.com/ec2/) instance, you'll need a local Python environment that has [fabric](http://fabfile.org/) installed. In general, this means follow the instructions you'll find all over the interwebs that walk you through:
 
 1. Installing Python 2.7
 2. Installing easy_install
@@ -105,24 +109,24 @@ To run the fabric command to deploy uriz to your new [EC2](http://aws.amazon.com
 7. workon uriz
 8. pip install fabric
 
-Isn't Python packaging great? Hopefully things get much easier in Python 3.3+, but I digress.
+Isn't Python packaging great? Once you've got those things working it is! Hopefully things get much easier in Python 3.3+, but I digress.
 
-One more thing we need to do before deploying the code is enter your Amazon account's access key/secret so the app can read and write to [DynamoDB](http://aws.amazon.com/dynamodb/). You can retrieve your key/secret from your [AWS](http://aws.amazon.com/) account's "Security Credentials" link, which is in the drop down in the upper right of most AWS console pages. After locating your key and secret, add a file to your local clone/fork of the uriz project inside of the uriz app named my_aws_settings.py. In my_aws_settings.py you'll need to define two variables, which should look something like this:
+One more thing we need to do before deploying the code is enter your Amazon account's access key/secret so the app can read and write to [DynamoDB](http://aws.amazon.com/dynamodb/) via Amazon's APIs. You can retrieve your key/secret from your [AWS](http://aws.amazon.com/) account's "Security Credentials" link, which is in the drop down in the upper right of most AWS console pages. After locating your key and secret, add a file to your local clone/fork of the uriz project inside of the uriz app named my_aws_settings.py. In my_aws_settings.py you'll need to define two variables, which should look something like this:
 
     AWS_ACCESS_KEY_ID = 'BZEDKIEFHLYIHZDQTQKB'
     AWS_SECRET_ACCESS_KEY = 'FazbumeFuCCA14ED7ahBtd/evqyGSWCtwcugF7vJ'
 
-The fabfile will use those variables to write a similar file to your deployed uriz web apps.
-
 (Don't worry, that isn't my actual key/secret and I've added my_aws_settings.py to this project's .gitingore, so it will only be on your local machine, not checked into github.)
 
-Alright, now let's setup our new [EC2](http://aws.amazon.com/ec2/) boxes by running the newbox fabric command, passing in your instance's Public DNS address in the -H argument:
+The fabfile will use those variables to write a similar file to your deployed uriz web apps.
+
+Alright, now let's setup our new [EC2](http://aws.amazon.com/ec2/) boxes by running the newbox fabric command, passing in your instance's Public DNS address in the -H host(s) argument:
 
     $ workon uriz
     $ cd ~/uriz
     $ fab -H ec2-50-17-41-254.compute-1.amazonaws.com newbox
     
-This command may take a few minutes to run, most of the time spent updating the OS and installing packages. After it's done, let's see if it worked.
+This command may take a few minutes to run, most of the time spent updating the OS and installing packages. After it's finished we can check if it worked.
 
 We haven't told the DNS ([Route53](http://aws.amazon.com/route53/)) about this new box yet, but we can hit it directly via the public IP. Visit that in your browser, e.g. http://50.17.41.254/ if your instance's Public DNS address was ec2-50-17-41-254.compute-1.amazonaws.com. If everything went well you should see a state-of-the-art URL shortener that looks something like this:
 
