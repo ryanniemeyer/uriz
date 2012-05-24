@@ -165,4 +165,4 @@ Now you're probably not going to survive a Bieber tweet with two small web nodes
 
 That's it! Not quite [Heroku](http://www.heroku.com/) or [App Engine](https://developers.google.com/appengine/) simple, but the trade off for the additional complexity is more control over the technologies you can use to construct your app. I'm a huge fan of [AWS](http://aws.amazon.com/) and I hope this helps someone out there get started with some of these services.
 
-O yeah, one more thing... Don't forget to shut down your EC2 instances if you're no longer needing them! Chances are http://uriz.in/ won't be up when you read this :)
+O yeah, one more thing... Don't forget to shut down your EC2 instances if you're no longer needing them, the meter is running! Chances are http://uriz.in/ won't be up when you read this, the point of this project is for you to deploy your own :)
