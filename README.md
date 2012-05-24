@@ -42,7 +42,7 @@ You can use the [DynamoDB APIs](http://aws.amazon.com/documentation/dynamodb/) o
 ![DynamoDB Add uriz_long Table](http://d283nftekqpxlr.cloudfront.net/img/github-pages/dynamo-6.png)
 ![DynamoDB Both Tables Created](http://d283nftekqpxlr.cloudfront.net/img/github-pages/dynamo-7.png)
 
-[DynamoDB APIs](http://aws.amazon.com/documentation/dynamodb/) has a nice [free tier](http://aws.amazon.com/dynamodb/pricing/), so this shouldn't cost you anything to play around with.
+[DynamoDB](http://aws.amazon.com/documentation/dynamodb/) has a nice [free tier](http://aws.amazon.com/dynamodb/pricing/), so this shouldn't cost you anything to play around with.
 
 ## Static Content
 
@@ -109,7 +109,7 @@ To run the fabric task that configures and deploys the uriz app to your new [EC2
 7. workon uriz
 8. pip install fabric
 
-Isn't Python packaging great? Once you've got those things working it is! Hopefully things get much easier in Python 3.3+, but I digress.
+Isn't Python packaging great? Once you've got those things working it is! Hopefully things get much easier to setup in Python 3.3+, but I digress.
 
 One more thing we need to do before deploying the code is enter your Amazon account's access key/secret so the app can read and write to [DynamoDB](http://aws.amazon.com/dynamodb/) via Amazon's APIs. You can retrieve your key/secret from your [AWS](http://aws.amazon.com/) account's "Security Credentials" link, which is in the drop down in the upper right of most AWS console pages. After locating your key and secret, add a file to your local clone/fork of the uriz project inside of the uriz app named my_aws_settings.py. In my_aws_settings.py you'll need to define two variables, which should look something like this:
 
